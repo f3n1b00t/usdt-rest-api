@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: contract-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST}:9411/api/v2/spans
+
+logging:
+  pattern:
+    level:
+      "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+server:
+  port: 8080
+
+web3j:
+  private-key: ${WEB3_PRIVATE_KEY}
+  node-url: ${WEB3_NODE_URL}
+  contract-address: ${WEB3_CONTRACT_ADDRESS}

@@ -1,0 +1,40 @@
+version: '3.8'
+
+x-healthcheck-variables: &healthcheck-variables
+  interval: 20s
+  timeout: 5s
+  retries: 5
+  start_period: 20s
+
+services:
+  zipkin: 
+    image: openzipkin/zipkin 
+    container_name: zipkin
+    environment: 
+      - STORAGE_TYPE=mem
+    ports:
+      - "9411:9411"
+    networks:
+      backend:
+        aliases:
+          - "zipkin"
+  contractservice:
+    build: ./contract-service
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: "curl --fail --silent localhost:8081/actuator/health | grep UP || exit 1"
+      <<: *healthcheck-variables
+    environment: 
+      - ZIPKIN_HOST=zipkin
+      - WEB3_PRIVATE_KEY=KEY
+      - WEB3_NODE_URL=URL
+      - WEB3_CONTRACT_ADDRESS=ADDRESS
+    networks:
+      backend:
+        aliases:
+          - "contractservice"
+
+networks:
+  backend:
+    driver: bridge
